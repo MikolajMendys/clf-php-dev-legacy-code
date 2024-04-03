@@ -56,13 +56,13 @@ SELECT ss.klient_id FROM `szanseSprzedazy` ss WHERE ss.id_procesu IN (58) AND ss
 UNION 
 SELECT  ss.klient_id FROM `szanseSprzedazy` ss WHERE ss.id_procesu IN (9,46,48,49,51,52)
 UNION 
-SELECT ss.klient_id FROM `szanseSprzedazy` ss WHERE ss.id_procesu IN (15,16,18,21,23,38,54,55, 40,50,53,65) AND ss.status IN ('otwarta')
+SELECT ss.klient_id FROM `szanseSprzedazy` ss WHERE ss.id_procesu IN (15,16,18,21,23,38,54,55,62,40,50,53,65) AND ss.status IN ('otwarta')
 UNION 
 SELECT ss.klient_id FROM `szanseSprzedazy` ss WHERE ss.id_procesu IN (40,50,53,65) AND ss.status IN ('wygrana')
 UNION 
 SELECT t.klient_id FROM `tagi` t WHERE t.tagId IN (10,11,24,32)
 UNION 
-SELECT ss.klient_id FROM `szanseSprzedazy` ss WHERE ss.id_procesu IN (40,50,53,65, 15,16,18,21,23,38,54,55) 
+SELECT ss.klient_id FROM `szanseSprzedazy` ss WHERE ss.id_procesu IN (40,50,53,65,62,15,16,18,21,23,38,54,55) 
     AND ss.status IN('przegrana') AND ss.data_zakonczenia > date_sub(curdate(),interval 1 MONTH)	
 UNION 
 SELECT z.klient_id FROM zamowienia z JOIN faktury f ON f.id_zamowienia = z.id WHERE z.status IN('do opłacenia') AND z.zaplacone = 'nie' AND f.rodzaj_faktury = 'VAT'
@@ -99,20 +99,22 @@ WHERE
     AND k.status = 'aktywny'
     AND NOT EXISTS(SELECT 1 FROM __wykluczenia w WHERE w.klient_id = k.id);
     
-SELECT k.id, k.imie, k.nazwisko, k.email, k.telefon, k.level
-FROM `klienci` k 
-JOIN uczestnicyProgramu u ON u.klient_id = k.id
-JOIN (
-    SELECT uczestnik_id, MAX(produkt_id) as max 
-    FROM `uczestnicyProgramuProdukty` t1 
-    WHERE t1.status = 'wyslane' 
-    GROUP BY uczestnik_id 
-    HAVING max>118
-) AS t2 ON t2.uczestnik_id = u.uczestnik_id
-WHERE
-    k.level = 'uczestnik' 
-    AND k.status = 'aktywny'
-    AND NOT EXISTS(SELECT 1 FROM __wykluczenia w WHERE w.klient_id = k.id);
+    SELECT k.id, k.imie, k.nazwisko, k.email, k.telefon, k.level, p.nazwa AS produkt_name
+    FROM `klienci` k 
+    JOIN uczestnicyProgramu u ON u.klient_id = k.id
+    JOIN (
+        SELECT uczestnik_id, MAX(produkt_id) as max 
+        FROM `uczestnicyProgramuProdukty` t1 
+        WHERE t1.status = 'wyslane' 
+        GROUP BY uczestnik_id 
+        HAVING max>118
+    ) AS t2 ON t2.uczestnik_id = u.uczestnik_id
+    JOIN produkty p ON p.id = max
+    WHERE
+        k.level = 'uczestnik' 
+        AND k.status = 'aktywny'
+        AND NOT EXISTS(SELECT 1 FROM __wykluczenia w WHERE w.klient_id = k.id);
+    
     ";
 
     $result = mysqli_multi_query($link, $query);
@@ -126,13 +128,19 @@ WHERE
         if ($result = mysqli_store_result($link)) {
             $data[$i] = [];
             while ($w = mysqli_fetch_assoc($result)) {
-                $data[$i][] = array(
+                $entry = array(
                     'klient_id' => $w['id'],
                     'klient'    => $w['imie'] . ' ' . $w['nazwisko'],
                     'telefon'   => $w['telefon'],
                     'email'     => $w['email'],
-                    'level'     => $w['level']
+                    'level'     => $w['level'],
                 );
+
+                if (isset($w['produkt_name'])) {
+                    $entry['produkt_name'] = $w['produkt_name'];
+                }
+
+                $data[$i][] = $entry;
             }
             $result->free();
         }

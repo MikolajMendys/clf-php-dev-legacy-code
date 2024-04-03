@@ -39,7 +39,7 @@ for ($i = 0; $i < 9; $i++) {
  
 // HTML
 breadcrumb();
-alert($alert); ?>
+?>
 
 <div class="containter">
     <div class="page-header">
@@ -92,6 +92,7 @@ alert($alert); ?>
                         <th>Telefon</th>
                         <th>E-mail</th>
                         <th style="width: 60px;">Level</th>
+                        <th>Nazwa PR</th>
                         <th style="width: 50px;">zaznacz</th>
                     </tr>
                 </thead>
@@ -117,7 +118,7 @@ alert($alert); ?>
         </div>
         <div class="panel-body max-500-height" >
             <form id="przydziel-zadanie-form">
-                <input type="hidden" name="grupa_leadow">
+                <input name="grupa_leadow">
                 <div class="form-group">
                     <label for="edytuj-pracownika-input">Opiekun*</label>
                     <select class="form-control" id="edytuj-pracownika-input" name="opiekun">
@@ -146,12 +147,16 @@ window.onload = function()
     // ZAZNACZ WIELE LEADOW I WYŚWIETL FORMULARZ
     $(document).on('click','.btn-add-task-to-many',function(e)
     {
-        
-
-        
-
-
-
+        var target = e.target;
+        var amount = target.dataset.ile;
+        var parent = $(target).parents('.grupa-leadow');
+        var checkboxes = $(parent).find('[data-klient-id]').prop('checked', false);
+        for (var i = 0; i < amount; i++) {
+            if (checkboxes[i]) {
+                $(checkboxes[i]).prop('checked', true);
+            }
+        }
+        $(parent).find('.btn-add-task-to-checked').click();
     });
     
 
@@ -160,7 +165,7 @@ window.onload = function()
         "retrieve": true,
         "order": [],
         "iDisplayLength": 25,
-        "language": {"url": "//cdn.datatables.net/plug-ins/1.10.7/i18n/Polish.json"},
+        "language": {"url": "https://cdn.datatables.net/plug-ins/1.10.7/i18n/Polish.json"},
         fnDrawCallback: function(){$("[data-toggle='tooltip']",this.fnGetNodes()).tooltip({"delay": 0,"track": true,"fade": 250});}
     });
     
@@ -170,6 +175,7 @@ window.onload = function()
         e.preventDefault();
         var grupa_leadow = $(this).parents('.grupa-leadow');
         var zaznaczone = $('input[data-klient-id]:checked',grupa_leadow);
+        console.log(zaznaczone)
         var len = zaznaczone.length;
         if(len){
             $('#czarne-tlo-przydziel-zadanie-form').show();
@@ -213,7 +219,7 @@ window.onload = function()
                     typ_zadania:106
                 },
                 dataType: "json",
-                beforeSend: function(){pokazPrzetwarzam();}
+                beforeSend: function(){/*pokazPrzetwarzam();*/}
             })
             .success(function(data){
                 if(data.status === 'success'){
@@ -242,52 +248,114 @@ window.onload = function()
     
 };
 
+const dane = [
+  {
+    klient_id: 1,
+    klient: 'Sheila Black',
+    telefon: '(465)600-9604x60439',
+    email: 'cjones@stewart.biz',
+    level: 'uczestnik',
+    produkt_name: 'Lekcja 11'
+  },
+  {
+    klient_id: 2,
+    klient: 'Diane Parker',
+    telefon: '001-521-022-4261x90172',
+    email: 'kimbrian@gonzalez.com',
+    level: 'uczestnik',
+    produkt_name: 'Lekcja 4'
+  },
+  {
+    klient_id: 3,
+    klient: 'Lisa Watkins',
+    telefon: '4855373227',
+    email: 'jaketanner@yahoo.com',
+    level: 'uczestnik',
+    produkt_name: 'Lekcja 11'
+  },
+  {
+    klient_id: 4,
+    klient: 'Erica Hall',
+    telefon: '118-214-6052x928',
+    email: 'jaimemartinez@hotmail.com',
+    level: 'klient',
+    produkt_name: 'Lekcja 11'
+  },
+  {
+    klient_id: 5,
+    klient: 'David Hill',
+    telefon: '516-146-7284',
+    email: 'ymyers@thompson.com',
+    level: 'klient',
+    produkt_name: 'Lekcja 12'
+  },
+  {
+    klient_id: 6,
+    klient: 'Tammy Sharp',
+    telefon: '(475)539-6543',
+    email: 'rivasjessica@lara-long.com',
+    level: 'uczestnik',
+    produkt_name: 'Lekcja 8'
+  },
+  {
+    klient_id: 7,
+    klient: 'Tina Rodriguez',
+    telefon: '001-998-836-1597x9396',
+    email: 'tsmith@yahoo.com',
+    level: 'uczestnik',
+    produkt_name: 'Lekcja 12'
+  },
+  {
+    klient_id: 8,
+    klient: 'Brittany Dickerson',
+    telefon: '838-832-1550x624',
+    email: 'anthonybell@gmail.com',
+    level: 'klient',
+    produkt_name: 'Lekcja 4'
+  },
+  {
+    klient_id: 9,
+    klient: 'Ashley Wilkerson',
+    telefon: '507-691-2603x91573',
+    email: 'wrobinson@hotmail.com',
+    level: 'uczestnik',
+    produkt_name: 'Lekcja 10'
+  },
+  {
+    klient_id: 10,
+    klient: 'Kristie Bowers',
+    telefon: '+1-218-693-7019',
+    email: 'bethanyrodriguez@hotmail.com',
+    level: 'klient',
+    produkt_name: 'Lekcja 10'
+  }
+];
 
 
 function  pokaz_leady(){
-    $.ajax({
-        url: "irpLeadsListAAjax.php",
-        method: "POST",
-        data: {user:'<?=$user_mod?>'},
-        dataType: "json",
-        beforeSend: function(){pokazPrzetwarzam();}
-    })
-    .success(function(data){
-        if(data.status === 'success')
-        {
-            for (var i = 0, max = 2; i < max; i++)
+    for (var i = 0, max = 2; i < max; i++)
             {
                 table = $('#tabela-leadow-'+i).DataTable();
-                table.clear();
-                $.each(data.dane[i], function(i,v)
+                console.log(table)
+                $.each(dane[i], function(i,v)
                 {
-                    if(typeof v.telefon === 'undefined' || v.telefon === null){v.telefon='';}
-                    var d1 = v.telefon.replace(/\D/mg, "");
-                    var d2 = ((d1.length === 11 || d1.length === 12) && d1.indexOf("48")===0) ? d1.substr(2) : d1;
-                    var d3 = ((d2.length === 10) && d2.indexOf("0")===0) ? d2.substr(1) : d2;
-                    var d4 = (d3.length === 9 ) ? d3.replace(/^(\d{3})(\d{3})(\d{3})$/, '$1 $2 $3') : v.telefon;
-                    var level = v.level === 'klient' ? '<span class="label label-primary">KLIENT</span>' : '<span class="label label-success">UCZESTNIK</span>';                
-                    var rowNode = table.row.add( [
+                    var level = v.level === 'klient' ? '<span class="label label-primary">KLIENT</span>' : '<span class="label label-success">UCZESTNIK</span>';   
+                    var rowArray = [
                         '<a href="/klientKarta&id='+v.klient_id+'" target="_blank">'+v.klient+'&nbsp;<small><span class="glyphicon glyphicon-new-window"></span></small></a>', 
-                        d4,
+                        v.telefon,
                         v.email,
                         level,
                         '<input data-klient-id="'+v.klient_id+'" type="checkbox">'
-                    ] 
-                    ).node();
+                    ];             
+                    if (v.produkt_name) {
+                        rowArray.splice(4, 0, v.produkt_name);
+                    }
+                    var rowNode = table.fnAddData(rowArray);
                     $(rowNode).attr('id','klient-'+v.klient_id+'-row');
                     $('td:eq(4),td:eq(5)',rowNode).addClass( 'text-center');
                 });
                 table.draw();
             }
-        }
-        else if(data.status === 'error')
-        {bootbox.alert('Błąd: '+data.message);}
-        else
-        {bootbox.alert("Nie udało się wykonać żądania. Błąd: "+data.message);}
-    })
-    .fail(function(){bootbox.alert("Nie udało się wysłać żądania.");})
-    .complete(function(){$('#czarne-tlo-przetwarzam').hide();});
 };
 
 </script>
