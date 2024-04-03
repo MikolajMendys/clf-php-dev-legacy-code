@@ -156,7 +156,7 @@ window.onload = function()
                 $(checkboxes[i]).prop('checked', true);
             }
         }
-        $(parent).find('.btn-add-task-to-checked').click();
+        $(parent).find('.btn-add-task-to-checked')
     });
     
 
@@ -175,7 +175,6 @@ window.onload = function()
         e.preventDefault();
         var grupa_leadow = $(this).parents('.grupa-leadow');
         var zaznaczone = $('input[data-klient-id]:checked',grupa_leadow);
-        console.log(zaznaczone)
         var len = zaznaczone.length;
         if(len){
             $('#czarne-tlo-przydziel-zadanie-form').show();
@@ -219,7 +218,7 @@ window.onload = function()
                     typ_zadania:106
                 },
                 dataType: "json",
-                beforeSend: function(){/*pokazPrzetwarzam();*/}
+                beforeSend: function(){pokazPrzetwarzam();}
             })
             .success(function(data){
                 if(data.status === 'success'){
@@ -248,96 +247,24 @@ window.onload = function()
     
 };
 
-const dane = [
-  {
-    klient_id: 1,
-    klient: 'Sheila Black',
-    telefon: '(465)600-9604x60439',
-    email: 'cjones@stewart.biz',
-    level: 'uczestnik',
-    produkt_name: 'Lekcja 11'
-  },
-  {
-    klient_id: 2,
-    klient: 'Diane Parker',
-    telefon: '001-521-022-4261x90172',
-    email: 'kimbrian@gonzalez.com',
-    level: 'uczestnik',
-    produkt_name: 'Lekcja 4'
-  },
-  {
-    klient_id: 3,
-    klient: 'Lisa Watkins',
-    telefon: '4855373227',
-    email: 'jaketanner@yahoo.com',
-    level: 'uczestnik',
-    produkt_name: 'Lekcja 11'
-  },
-  {
-    klient_id: 4,
-    klient: 'Erica Hall',
-    telefon: '118-214-6052x928',
-    email: 'jaimemartinez@hotmail.com',
-    level: 'klient',
-    produkt_name: 'Lekcja 11'
-  },
-  {
-    klient_id: 5,
-    klient: 'David Hill',
-    telefon: '516-146-7284',
-    email: 'ymyers@thompson.com',
-    level: 'klient',
-    produkt_name: 'Lekcja 12'
-  },
-  {
-    klient_id: 6,
-    klient: 'Tammy Sharp',
-    telefon: '(475)539-6543',
-    email: 'rivasjessica@lara-long.com',
-    level: 'uczestnik',
-    produkt_name: 'Lekcja 8'
-  },
-  {
-    klient_id: 7,
-    klient: 'Tina Rodriguez',
-    telefon: '001-998-836-1597x9396',
-    email: 'tsmith@yahoo.com',
-    level: 'uczestnik',
-    produkt_name: 'Lekcja 12'
-  },
-  {
-    klient_id: 8,
-    klient: 'Brittany Dickerson',
-    telefon: '838-832-1550x624',
-    email: 'anthonybell@gmail.com',
-    level: 'klient',
-    produkt_name: 'Lekcja 4'
-  },
-  {
-    klient_id: 9,
-    klient: 'Ashley Wilkerson',
-    telefon: '507-691-2603x91573',
-    email: 'wrobinson@hotmail.com',
-    level: 'uczestnik',
-    produkt_name: 'Lekcja 10'
-  },
-  {
-    klient_id: 10,
-    klient: 'Kristie Bowers',
-    telefon: '+1-218-693-7019',
-    email: 'bethanyrodriguez@hotmail.com',
-    level: 'klient',
-    produkt_name: 'Lekcja 10'
-  }
-];
 
 
 function  pokaz_leady(){
-    for (var i = 0, max = 2; i < max; i++)
+    $.ajax({
+        url: "irpLeadsListAAjax.php",
+        method: "POST",
+        data: {user:'<?=$user_mod?>'},
+        dataType: "json",
+        beforeSend: function(){pokazPrzetwarzam();}
+    })
+    .success(function(data){
+        if(data.status === 'success')
+        {
+            for (var i = 0, max = 2; i < max; i++)
             {
                 table = $('#tabela-leadow-'+i).DataTable();
-                console.log(table)
-                $.each(dane[i], function(i,v)
+                table.clear();
+                $.each(data.dane[i], function(i,v)
                 {
                     var level = v.level === 'klient' ? '<span class="label label-primary">KLIENT</span>' : '<span class="label label-success">UCZESTNIK</span>';   
                     var rowArray = [
